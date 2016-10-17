@@ -6,11 +6,13 @@ organization := "com.gilt"
 
 scalaVersion := "2.11.8"
 
-crossScalaVersions := Seq("2.11.8", "2.10.5")
+crossScalaVersions := Seq(scalaVersion.value, "2.12.0-RC1", "2.10.6")
+
+scalacOptions += "-target:jvm-1.7"
 
 libraryDependencies ++= Seq(
-  "com.gilt" %% "gfc-logging" % "0.0.5",
-  "com.gilt" %% "gfc-time" % "0.0.5" % "test",
+  "com.gilt" %% "gfc-logging" % "0.0.6",
+  "com.gilt" %% "gfc-time" % "0.0.6" % "test",
   "org.scalatest" %% "scalatest" % "3.0.0" % "test",
   "org.mockito" % "mockito-core" % "1.10.19" % "test"
 )

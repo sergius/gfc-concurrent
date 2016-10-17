@@ -19,7 +19,7 @@ class TimeLimitedFutureSpec extends WordSpec with Matchers {
         val msg: String = Await.result(future, Duration(10, "seconds"))
         val elapsed = (System.currentTimeMillis - now)
         msg should equal ("Here I am")
-        (elapsed < (1000 + 100)) should be (true)
+        elapsed should be (1000L +- 500L)
       }
 
       "return the failure of the original Future if it fails before the given timeout" in {
@@ -27,7 +27,7 @@ class TimeLimitedFutureSpec extends WordSpec with Matchers {
         val future = (Future { Thread.sleep(1000); throw new NullPointerException("That hurts!") }).withTimeout(Duration(2, "seconds"))
         a [NullPointerException] should be thrownBy { Await.result(future, Duration(10, "seconds")) }
         val elapsed = (System.currentTimeMillis - now)
-        (elapsed < (1000 + 100)) should be (true)
+        elapsed should be (1000L +- 500L)
       }
 
       "return the timeout of the original Future if it had one and it went off and was shorter than the given one" in {

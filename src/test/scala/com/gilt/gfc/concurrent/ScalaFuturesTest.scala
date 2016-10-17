@@ -27,14 +27,14 @@ class ScalaFuturesTest extends FunSuite with Matchers {
     val f2: Future[Try[String]] = Future.successful(Failure(new RuntimeException("boom")))
     val f3: Future[Try[String]] = Future.failed(new RuntimeException("bang"))
 
-    await(f1.flatten) shouldBe "ok"
+    await(f1.tryFlatten) shouldBe "ok"
 
     (the [RuntimeException] thrownBy {
-      await(f2.flatten)
+      await(f2.tryFlatten)
     }).getMessage shouldBe "boom"
 
     (the [RuntimeException] thrownBy {
-      await(f3.flatten)
+      await(f3.tryFlatten)
     }).getMessage shouldBe "bang"
   }
 
@@ -284,13 +284,13 @@ class ScalaFuturesTest extends FunSuite with Matchers {
 
     val timeDeltas = times.result().sliding(2).map(v => v(1) - v(0)).toList
     timeDeltas.length shouldBe 7
-    timeDeltas(0) shouldBe 20L  +- 20L
-    timeDeltas(1) shouldBe 120L +- 20L
-    timeDeltas(2) shouldBe 170L +- 20L
-    timeDeltas(3) shouldBe 245L +- 20L
-    timeDeltas(4) shouldBe 357L +- 20L
-    timeDeltas(5) shouldBe 520L +- 20L
-    timeDeltas(6) shouldBe 520L +- 20L
+    timeDeltas(0) shouldBe 40L  +- 40L
+    timeDeltas(1) shouldBe 140L +- 40L
+    timeDeltas(2) shouldBe 190L +- 40L
+    timeDeltas(3) shouldBe 265L +- 40L
+    timeDeltas(4) shouldBe 377L +- 40L
+    timeDeltas(5) shouldBe 540L +- 40L
+    timeDeltas(6) shouldBe 540L +- 40L
   }
 
   test("retryWithExponentialDelay retries if future function throws") {

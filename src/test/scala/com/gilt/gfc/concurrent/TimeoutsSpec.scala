@@ -14,10 +14,9 @@ class TimeoutsSpec extends WordSpec with Matchers {
         val now = System.currentTimeMillis
         val after = FiniteDuration(1, "second")
         val timingOut = Timeouts.timeout(after)
-        val thrown = the [TimeoutException] thrownBy { Await.result(timingOut, Duration(10, "seconds")) }
+        an [TimeoutException] should be thrownBy { Await.result(timingOut, Duration(10, "seconds")) }
         val elapsed = (System.currentTimeMillis - now)
-        elapsed should be <= after.toMillis + 100
-        elapsed should be >= after.toMillis
+        elapsed should be (after.toMillis +- 500L)
       }
 
       "create timing out Futures that will fail predictably even under load" in {
@@ -49,7 +48,12 @@ class TimeoutsSpec extends WordSpec with Matchers {
         val timingOut = Timeouts.timeout(1 millis)
         val thrown = the [TimeoutException] thrownBy { Await.result(timingOut, Duration(10, "seconds")) }
         thrown.getStackTrace.size shouldBe > (50)
-        thrown.getStackTrace.drop(7) shouldBe here.getStackTrace.drop(1)
+        val thrownFrames = thrown.getStackTrace.map(f => f: AnyRef).drop(7)
+        val expectedFrames = here.getStackTrace.map(f => f: AnyRef)
+        // Scala 2.12 stack frames differ slightly to stack frames in 2.10/2.11
+        if (!java.util.Arrays.deepEquals(thrownFrames, expectedFrames.drop(2))) {
+          thrownFrames shouldBe expectedFrames.drop(1)
+        }
         thrown.getCause should not be null
         thrown.getCause.getStackTrace.size shouldBe <= (10)
 

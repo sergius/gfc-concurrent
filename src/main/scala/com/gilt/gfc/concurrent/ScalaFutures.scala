@@ -37,9 +37,13 @@ object ScalaFutures {
   }
 
   implicit class FutureTryOps[A](val f: Future[Try[A]]) extends AnyVal {
+    @deprecated("This does not work any longer with scala 2.12 due to the addition of Future.flatten, use tryFlatten")
     def flatten(implicit ec: ExecutionContext): Future[A] = f.flatMap(fromTry(_))
+
+    def tryFlatten(implicit ec: ExecutionContext): Future[A] = f.flatMap(fromTry(_))
   }
 
+  // Obsolete in scala 2.12 thanks to the addition of Future.flatten
   implicit class FutureFutureOps[A](val f: Future[Future[A]]) extends AnyVal {
     def flatten(implicit ec: ExecutionContext): Future[A] = f.flatMap(identity)
   }
