@@ -4,12 +4,12 @@ A library that contains scala concurrency helper code. Part of the gilt foundati
 
 ## Getting gfc-concurrent
 
-The latest version is 0.3.4, which is cross-built against Scala 2.10.x, 2.11.x and 2.12.0-RC1.
+The latest version is 0.3.5, which is cross-built against Scala 2.10.x, 2.11.x and 2.12.x.
 
 If you're using SBT, add the following line to your build file:
 
 ```scala
-libraryDependencies += "com.gilt" %% "gfc-concurrent" % "0.3.4"
+libraryDependencies += "com.gilt" %% "gfc-concurrent" % "0.3.5"
 ```
 
 For Maven and other build tools, you can visit [search.maven.org](http://search.maven.org/#search%7Cga%7C1%7Ccom.gilt%20gfc).
