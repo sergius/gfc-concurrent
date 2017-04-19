@@ -13,7 +13,7 @@ scalacOptions += "-target:jvm-1.7"
 javacOptions ++= Seq("-source", "1.7", "-target", "1.7")
 
 libraryDependencies ++= Seq(
-  "com.gilt" %% "gfc-logging" % "0.0.7",
+  "com.gilt" %% "gfc-logging" % "0.0.8",
   "com.gilt" %% "gfc-time" % "0.0.7" % "test",
   "org.scalatest" %% "scalatest" % "3.0.1" % "test",
   "org.mockito" % "mockito-core" % "1.10.19" % "test"
