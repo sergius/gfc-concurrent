@@ -8,10 +8,11 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 import scala.language.postfixOps
+import org.scalatest.concurrent.Eventually
 
 
 class BatcherTest
-  extends FunSuite {
+  extends FunSuite with Eventually {
 
   test("batcher works single-threadedly") {
     for ( maxOutstanding <- (1 to 10) ;
@@ -35,7 +36,10 @@ class BatcherTest
     records.foreach(i => batcher.add(i))
 
     Thread.sleep(1001L) // should flush after 1sec
-    assert(adder.intValue == records.sum)
+
+    eventually {
+      assert(adder.intValue == records.sum)
+    }
 
     batcher.shutdown()
   }
@@ -60,6 +64,7 @@ class BatcherTest
     Await.result(Future.sequence(futures), 2 seconds) // should flush after 1sec
 
     assert(adder.intValue == records.sum)
+
     batcher.shutdown()
   }
 
