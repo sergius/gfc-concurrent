@@ -13,10 +13,6 @@ object JavaConversions {
     override val executorService = jes
   }
 
-  implicit def asScalaScheduledExecutorService(jses: JScheduledExecutorService): ScheduledExecutorService = new JScheduledExecutorServiceWrapper {
-    override val executorService = jses
-  }
-
   implicit def asScalaAsyncScheduledExecutorService(jses: JScheduledExecutorService): AsyncScheduledExecutorService = new JScheduledExecutorServiceWrapper {
     override val executorService = jses
   }
