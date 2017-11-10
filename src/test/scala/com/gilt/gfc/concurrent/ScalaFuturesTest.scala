@@ -1,15 +1,19 @@
 package com.gilt.gfc.concurrent
 
-import java.util.concurrent.atomic.{AtomicInteger, AtomicBoolean}
+import java.util.concurrent.Executors
+import java.util.concurrent.atomic.{AtomicBoolean, AtomicInteger}
+
 import scala.collection.immutable.VectorBuilder
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.duration._
-import scala.concurrent.{Await, Future}
+import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
-import org.scalatest.{Matchers, FunSuite}
+import org.scalatest.{FunSuite, Matchers}
 
 class ScalaFuturesTest extends FunSuite with Matchers {
   implicit def logSuppressor(t: Throwable): Unit = {}
+
+  val cachedEc = ExecutionContext.fromExecutorService(Executors.newCachedThreadPool())
 
   import ScalaFutures._
 
@@ -21,7 +25,7 @@ class ScalaFuturesTest extends FunSuite with Matchers {
   }
 
   test("implicit FutureTry flatten") {
-    import scala.concurrent.ExecutionContext.Implicits.global
+    implicit val ec = cachedEc
 
     val f1: Future[Try[String]] = Future.successful(Success("ok"))
     val f2: Future[Try[String]] = Future.successful(Failure(new RuntimeException("boom")))
@@ -39,7 +43,7 @@ class ScalaFuturesTest extends FunSuite with Matchers {
   }
 
   test("implicit FutureFuture flatten") {
-    import scala.concurrent.ExecutionContext.Implicits.global
+    implicit val ec = cachedEc
 
     val t1: Future[Future[String]] = Future.successful(Future.successful("ok"))
     val t2: Future[Future[String]] = Future.successful(Future.failed(new RuntimeException("boom")))
@@ -57,7 +61,7 @@ class ScalaFuturesTest extends FunSuite with Matchers {
   }
 
   test("exists") {
-    import scala.concurrent.ExecutionContext.Implicits.global
+    implicit val ec = cachedEc
 
     val futures: Seq[Future[Int]] = Seq(1.asFuture, 2.asFuture, 3.asFuture)
 
@@ -69,7 +73,7 @@ class ScalaFuturesTest extends FunSuite with Matchers {
   }
 
   test("forall") {
-    import scala.concurrent.ExecutionContext.Implicits.global
+    implicit val ec = cachedEc
 
     val futures: Seq[Future[Int]] = Seq(1.asFuture, 2.asFuture, 3.asFuture)
 
@@ -96,7 +100,7 @@ class ScalaFuturesTest extends FunSuite with Matchers {
   }
 
   test("foldFast succeeds simple") {
-    import scala.concurrent.ExecutionContext.Implicits.global
+    implicit val ec = cachedEc
 
     val futures: Seq[Future[Int]] = Seq(1.asFuture, 2.asFuture, 3.asFuture)
     val result: Future[Int] = ScalaFutures.foldFast(futures)(0)(_ + _)
@@ -104,7 +108,7 @@ class ScalaFuturesTest extends FunSuite with Matchers {
   }
 
   test("foldFast fails simple") {
-    import scala.concurrent.ExecutionContext.Implicits.global
+    implicit val ec = cachedEc
 
     val futures: Seq[Future[Int]] = Seq(1.asFuture, 2.asFuture, Future.failed(new RuntimeException("boom")))
     val result: Future[Int] = ScalaFutures.foldFast(futures)(0)(_ + _)
@@ -113,7 +117,7 @@ class ScalaFuturesTest extends FunSuite with Matchers {
   }
 
   def newFuture[T](result: => T, timeout: Long): Future[T] = {
-    import scala.concurrent.ExecutionContext.Implicits.global
+    implicit val ec = cachedEc
 
     Future {
       Thread.sleep(timeout)
@@ -122,19 +126,19 @@ class ScalaFuturesTest extends FunSuite with Matchers {
   }
 
   test("foldFast succeeds slow") {
-    import scala.concurrent.ExecutionContext.Implicits.global
+    implicit val ec = cachedEc
 
     val now = System.currentTimeMillis()
-    val futures: Seq[Future[Int]] = Seq(newFuture(1, 1000), newFuture(2, 1000), newFuture(3, 1000))
+    val futures: Seq[Future[Int]] = Seq(newFuture(1, 2000), newFuture(2, 2000), newFuture(3, 2000))
     val result: Future[Int] = ScalaFutures.foldFast(futures)(0)(_ + _)
     System.currentTimeMillis() should be <(now + 200)
     await(result) should be(6)
-    System.currentTimeMillis() should be >=(now + 1000)
-    System.currentTimeMillis() should be <(now + 1800)
+    System.currentTimeMillis() should be >=(now + 2000)
+    System.currentTimeMillis() should be <(now + 3800)
   }
 
   test("foldFast fails fast") {
-    import scala.concurrent.ExecutionContext.Implicits.global
+    implicit val ec = cachedEc
 
     val now = System.currentTimeMillis()
     val futures: Seq[Future[Int]] = Seq(newFuture(1, 2000), newFuture(2, 2000), newFuture(throw new RuntimeException("boom"), 400))
@@ -147,7 +151,7 @@ class ScalaFuturesTest extends FunSuite with Matchers {
   }
 
   test("traverseSequential kicks off futures sequentially") {
-    import scala.concurrent.ExecutionContext.Implicits.global
+    implicit val ec = cachedEc
 
     val counter = new AtomicInteger()
 
@@ -162,7 +166,7 @@ class ScalaFuturesTest extends FunSuite with Matchers {
   }
 
   test("traverseSequential fails fast") {
-    import scala.concurrent.ExecutionContext.Implicits.global
+    implicit val ec = cachedEc
 
     val buf = new ListBuffer[Int]()
 

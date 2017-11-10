@@ -15,11 +15,11 @@ class TimeLimitedFutureSpec extends WordSpec with Matchers {
     "waiting for a result to happen" should {
       "return the completed original Future if it completes before the given timeout" in {
         val now = System.currentTimeMillis
-        val future: Future[String] = (Future { Thread.sleep(1000); "Here I am" }).withTimeout(Duration(2, "seconds"))
+        val future: Future[String] = (Future { Thread.sleep(1000); "Here I am" }).withTimeout(Duration(5, "seconds"))
         val msg: String = Await.result(future, Duration(10, "seconds"))
         val elapsed = (System.currentTimeMillis - now)
         msg should equal ("Here I am")
-        elapsed should be (1000L +- 500L)
+        elapsed should be (2000L +- 1000L)
       }
 
       "return the failure of the original Future if it fails before the given timeout" in {

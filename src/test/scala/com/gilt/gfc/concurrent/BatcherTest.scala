@@ -61,7 +61,7 @@ class BatcherTest
     val records = (1 to 10000)
 
     val futures = records.map(i => Future{ batcher.add(i) } )
-    Await.result(Future.sequence(futures), 2 seconds) // should flush after 1sec
+    Await.result(Future.sequence(futures), 5 seconds) // should flush after 1sec
 
     assert(adder.intValue == records.sum)
 
