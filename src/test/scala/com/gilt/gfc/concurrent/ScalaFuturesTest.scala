@@ -125,25 +125,25 @@ class ScalaFuturesTest extends FunSuite with Matchers {
     import scala.concurrent.ExecutionContext.Implicits.global
 
     val now = System.currentTimeMillis()
-    val futures: Seq[Future[Int]] = Seq(newFuture(1, 400), newFuture(2, 400), newFuture(3, 400))
+    val futures: Seq[Future[Int]] = Seq(newFuture(1, 1000), newFuture(2, 1000), newFuture(3, 1000))
     val result: Future[Int] = ScalaFutures.foldFast(futures)(0)(_ + _)
     System.currentTimeMillis() should be <(now + 200)
     await(result) should be(6)
-    System.currentTimeMillis() should be >=(now + 400)
-    System.currentTimeMillis() should be <(now + 600)
+    System.currentTimeMillis() should be >=(now + 1000)
+    System.currentTimeMillis() should be <(now + 1800)
   }
 
   test("foldFast fails fast") {
     import scala.concurrent.ExecutionContext.Implicits.global
 
     val now = System.currentTimeMillis()
-    val futures: Seq[Future[Int]] = Seq(newFuture(1, 400), newFuture(2, 1200), newFuture(throw new RuntimeException("boom"), 400))
+    val futures: Seq[Future[Int]] = Seq(newFuture(1, 2000), newFuture(2, 2000), newFuture(throw new RuntimeException("boom"), 400))
     val result: Future[Int] = ScalaFutures.foldFast(futures)(0)(_ + _)
     System.currentTimeMillis() should be <(now + 200)
     val thrown = the [RuntimeException] thrownBy { await(result) }
     thrown.getMessage should be("boom")
     System.currentTimeMillis() should be >=(now + 400)
-    System.currentTimeMillis() should be <(now + 600)
+    System.currentTimeMillis() should be <(now + 1800)
   }
 
   test("traverseSequential kicks off futures sequentially") {
